@@ -1,11 +1,12 @@
+import { Toaster } from "sonner"
+import MainRoutes from "./MainRoutes"
 
 function App() {
 
   return (
     <>
-     
-      <h1>Vite + React</h1>
-     
+      <Toaster position="top-right" richColors closeButton />
+      <MainRoutes />
     </>
   )
 }
