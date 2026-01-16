@@ -1,19 +1,19 @@
-import {config} from "dotenv"
+import { config } from "dotenv"
 config()
 import app from "./app";
 
 
-const startServer= async ()=>{
-  try{
+const startServer = async () => {
+  try {
+   
+    const PORT = process.env.PORT;
 
-    const PORT=process.env.PORT;
-
-    app.listen(PORT,()=>{
-        console.log(`Server starting at port ${PORT}`)
+    app.listen(PORT, () => {
+      console.log(`Server starting at port ${PORT}`)
     })
-  }catch(error){
-     throw new Error("Error starting server")
-     process.exit(1);
+  } catch (error) {
+    throw new Error("Error starting server")
+    process.exit(1);
   }
 }
 
