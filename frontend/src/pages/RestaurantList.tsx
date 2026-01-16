@@ -1,9 +1,7 @@
-import { Fullscreen, WidthFull } from "@mui/icons-material";
 import {
     Container,
     Card,
     CardContent,
-    CardActions,
     Typography,
     Button,
     Modal,
@@ -18,7 +16,7 @@ import Grid from "@mui/material/Grid"
 import { useEffect, useState } from "react";
 import type { Restaurant, RestaurantInput, RestaurantValidationError } from "../types/restaurant.types";
 import { useApiErrorHandler } from "../hooks/useApiErrorHandler";
-import { createRestaurantAPI, listRestaurantsAPI, updateRestaurantAPI } from "../services/restaurantService";
+import { createRestaurantAPI, listRestaurantsAPI, removeRestaurantAPI, updateRestaurantAPI } from "../services/restaurantService";
 import { toast } from "sonner";
 import { RegexValues } from "../constants/regex-values";
 import { Messages } from "../constants/messages";
@@ -38,7 +36,7 @@ const style = {
 export default function RestaurantList() {
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
-    const [openDelete, setOpenDelete] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
     const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
     const [restaurantInput, setRestaurantInput] = useState<RestaurantInput>({
@@ -120,7 +118,7 @@ export default function RestaurantList() {
         }
     }
     const editRestaurant = async () => {
-        if(!selectedRestaurant){
+        if (!selectedRestaurant) {
             toast.error("some error occured.Please try again later.");
             return;
         }
@@ -130,28 +128,28 @@ export default function RestaurantList() {
             setErrors(validationErrors)
             return;
         }
-         const updatePayload: Partial<RestaurantInput> = {};
+        const updatePayload: Partial<RestaurantInput> = {};
 
-    if (restaurantInput.name !== selectedRestaurant.name) {
-        updatePayload.name = restaurantInput.name;
-    }
+        if (restaurantInput.name !== selectedRestaurant.name) {
+            updatePayload.name = restaurantInput.name;
+        }
 
-    if (restaurantInput.address !== selectedRestaurant.address) {
-        updatePayload.address = restaurantInput.address;
-    }
+        if (restaurantInput.address !== selectedRestaurant.address) {
+            updatePayload.address = restaurantInput.address;
+        }
 
-    if (restaurantInput.contact !== selectedRestaurant.contact) {
-        updatePayload.contact = restaurantInput.contact;
-    }
+        if (restaurantInput.contact !== selectedRestaurant.contact) {
+            updatePayload.contact = restaurantInput.contact;
+        }
 
-    if (Object.keys(updatePayload).length === 0) {
-        toast.info(Messages.NO_CHANGES_DETECTED);
-        return;
-    }
+        if (Object.keys(updatePayload).length === 0) {
+            toast.info(Messages.NO_CHANGES_DETECTED);
+            return;
+        }
         try {
             const restaurantWithMessage = await updateRestaurantAPI({
                 ...updatePayload,
-              restaurantId:selectedRestaurant.restaurantId.toString(),
+                restaurantId: selectedRestaurant.restaurantId.toString(),
             });
             toast.success(restaurantWithMessage.message);
             listRestaurants();
@@ -180,16 +178,27 @@ export default function RestaurantList() {
             contact: ""
         })
     }
-    // const handleEdit = (restaurant: Restaurant) => {
-    //     setSelectedRestaurant(restaurant);
-    //     setOpenModal(true);
-    // };
 
-    const handleDelete = (restaurant: Restaurant) => {
+    const openDeleteModal = (restaurant: Restaurant) => {
         setSelectedRestaurant(restaurant);
-        setOpenDelete(true);
+        setShowDeleteModal(true);
     };
 
+    const deleteRestaurant=async ()=>{
+        try{
+            if(selectedRestaurant===null){
+                toast.error("Some error occured.Please try again later.")
+            }
+           const deletionResponse=await removeRestaurantAPI(selectedRestaurant!.restaurantId.toString());
+           toast.success(deletionResponse.message|| Messages.RESTAURANT_REMOVED);
+           listRestaurants();
+           setSelectedRestaurant(null);
+           setShowDeleteModal(false);
+        }catch(error){
+            console.log("error deleting restaurant",error);
+            handleApiError(error)
+        }
+    }
     return (
         <Container sx={{ mt: 4, minHeight: "100vh", width: "100vw" }}>
             {/* Header */}
@@ -229,7 +238,7 @@ export default function RestaurantList() {
                                         }}>
                                             Edit
                                         </Button>
-                                        <Button onClick={() => handleDelete(restaurant)}>
+                                        <Button onClick={() => openDeleteModal(restaurant)}>
                                             Delete
                                         </Button>
                                     </Box>
@@ -370,17 +379,23 @@ export default function RestaurantList() {
                 </Box>
             </Modal>
 
-            {/* Delete Confirmation Dialog */}
-            <Dialog open={openDelete} onClose={() => setOpenDelete(false)}>
+            {/* Delete Confirmation Modal */}
+            <Dialog open={showDeleteModal} onClose={() => {
+                setShowDeleteModal(false);
+                setSelectedRestaurant(null);
+            }}>
                 <DialogTitle>Confirm Deletion</DialogTitle>
                 <DialogContent>
                     Are you sure you want to delete this restaurant?
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => setOpenDelete(false)}>
+                    <Button onClick={() => {
+                        setShowDeleteModal(false);
+                        setSelectedRestaurant(null);
+                    }}>
                         Cancel
                     </Button>
-                    <Button color="error" variant="contained">
+                    <Button color="error" variant="contained" onClick={()=>deleteRestaurant()}>
                         Delete
                     </Button>
                 </DialogActions>

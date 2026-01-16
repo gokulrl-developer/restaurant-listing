@@ -148,3 +148,29 @@ export const updateRestaurant = async (req: Request,
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_SERVER_ERROR })
     }
 }
+export const removeRestaurant = async (req: Request,
+    res: Response,
+    next: NextFunction) => {
+    try {
+        const restaurantId = req.params.restaurantId;
+        if (!restaurantId) {
+            res.status(StatusCodes.BAD_REQUEST).json({ message:Messages.INVALID_REQUEST})
+        }
+       const deletedCount = await Restaurant.destroy({
+            where: { id: restaurantId },
+        });
+
+        if (deletedCount === 0) {
+            return res
+                .status(StatusCodes.NOT_FOUND)
+                .json({ message: Messages.RESTAURANT_NOT_FOUND });
+        }
+        return res.status(StatusCodes.OK).json({
+            message: Messages.RESTAURANT_REMOVED,
+        });
+
+    } catch (error) {
+        console.log("error updating restaurant", error);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_SERVER_ERROR })
+    }
+}

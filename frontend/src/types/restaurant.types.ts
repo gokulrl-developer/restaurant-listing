@@ -37,3 +37,7 @@ export interface UpdateRestaurantResponse{
     message:string,
     restaurant:Restaurant
 }
+
+export interface RemoveRestaurantResponse{
+    message:string
+}

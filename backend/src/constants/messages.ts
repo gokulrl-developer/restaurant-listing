@@ -12,5 +12,6 @@ export const Messages={
   INVALID_NAME:"Inavalid name",
   INVALID_ADDRESS:"Invalid address",
   RESTAURANT_UPDATED:"Restaurant updated successfully",
-  RESTAURANT_NOT_FOUND:"Restaurant not found"
+  RESTAURANT_NOT_FOUND:"Restaurant not found",
+  RESTAURANT_REMOVED:"Restaurant removed successfully",
 }as const;

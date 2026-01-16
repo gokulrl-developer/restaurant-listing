@@ -1,5 +1,5 @@
 import { RestaurantRoutes } from "../constants/RestaurantRoutes";
-import type { CreateRestaurantResponse, ListRestaurantsResponse, RestaurantInput, RestaurantUpdateInput, UpdateRestaurantResponse } from "../types/restaurant.types";
+import type { CreateRestaurantResponse, ListRestaurantsResponse, RemoveRestaurantResponse, RestaurantInput, RestaurantUpdateInput, UpdateRestaurantResponse } from "../types/restaurant.types";
 import axiosInstance from "./axiosInstance";
 
 export const createRestaurantAPI=(payload:RestaurantInput)=>{
@@ -15,4 +15,7 @@ export const updateRestaurantAPI=(payload:RestaurantUpdateInput)=>{
                 contact:payload.contact
             }
     return axiosInstance.patch<UpdateRestaurantResponse>(RestaurantRoutes.UPDATE_RESTAURANT(payload.restaurantId),requestBody).then(res=>res.data)
+}
+export const removeRestaurantAPI=(restaurantId:string)=>{
+    return axiosInstance.delete<RemoveRestaurantResponse>(RestaurantRoutes.REMOVE_RESTAURANT(restaurantId)).then(res=>res.data)
 }
