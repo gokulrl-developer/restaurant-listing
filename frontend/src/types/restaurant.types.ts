@@ -21,3 +21,7 @@ export interface RestaurantInput{
     address:string,
     contact:string
 }
+
+export interface ListRestaurantsResponse{
+    restaurants:Restaurant[]
+}

@@ -7,4 +7,5 @@ export const Messages={
   CONTACTS_INVALID: "Phone must be a 10 digit number",
   RESTAURANT_EXISTS:"The restaurant already exists in the list",
   RESTAURANT_CREATED:"The restaurant saved successfully",
+  INTERNAL_SERVER_ERROR:"Internal server error",
 }as const;

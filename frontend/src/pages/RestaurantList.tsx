@@ -15,10 +15,10 @@ import {
     DialogActions
 } from "@mui/material";
 import Grid from "@mui/material/Grid"
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Restaurant, RestaurantInput, RestaurantValidationError } from "../types/restaurant.types";
 import { useApiErrorHandler } from "../hooks/useApiErrorHandler";
-import { createRestaurantAPI } from "../services/restaurantService";
+import { createRestaurantAPI, listRestaurantsAPI } from "../services/restaurantService";
 import { toast } from "sonner";
 import { RegexValues } from "../constants/regex-values";
 import { Messages } from "../constants/messages";
@@ -38,6 +38,7 @@ const style = {
 export default function RestaurantList() {
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [openDelete, setOpenDelete] = useState(false);
+    const [restaurants,setRestaurants]=useState<Restaurant[]>([]);
     const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
     const [restaurantInput, setRestaurantInput] = useState<RestaurantInput>({
         name: "",
@@ -52,21 +53,19 @@ export default function RestaurantList() {
         }
     )
     const { handleApiError } = useApiErrorHandler();
-    const restaurants = [
-        {
-            restaurantId: 1,
-            name: "Spice Garden",
-            address: "MG Road, Bangalore",
-            contact: "9876543210"
-        },
-        {
-            restaurantId: 2,
-            name: "Ocean Delight",
-            address: "Beach Road, Kochi",
-            contact: "9123456780"
-        }
-    ];
+    useEffect(()=>{
+        listRestaurants();
+    },[])
+    const listRestaurants=async()=>{
+        try{
+            const restaurantsObject=await listRestaurantsAPI();
+            setRestaurants(restaurantsObject.restaurants)
 
+        }catch(error){
+            console.log("error on fetching restaurants",error);
+            handleApiError(error)
+        }
+    }
     const validateRestaurant = () => {
         const { name, address, contact } = restaurantInput;
         const phoneRegex = RegexValues.PHONE_REGEX;
@@ -110,8 +109,10 @@ export default function RestaurantList() {
                 contact: restaurantInput.contact
             });
             toast.success(restaurantWithMessage.message);
-
-
+            listRestaurants();
+            setShowCreateModal(false);
+            clearRestaurantInput();
+            clearErrors()
         } catch (error) {
             console.log(error);
             handleApiError(error)
@@ -123,6 +124,14 @@ export default function RestaurantList() {
             nameError: [],
             addressError: [],
             contactError: []
+        })
+    }
+
+    const clearRestaurantInput=()=>{
+        setRestaurantInput({
+            name:"",
+            address:"",
+            contact:""
         })
     }
     // const handleEdit = (restaurant: Restaurant) => {
@@ -179,6 +188,7 @@ export default function RestaurantList() {
             {/* Add */}
             <Modal open={showCreateModal} onClose={() => {
                 setShowCreateModal(false);
+                clearRestaurantInput();
                 clearErrors();
                 }}>
                 <Box sx={style}>
@@ -228,6 +238,7 @@ export default function RestaurantList() {
                     <Grid container justifyContent="flex-end" mt={2}>
                         <Button onClick={() => {
                             setShowCreateModal(false);
+                            clearRestaurantInput()
                             clearErrors();
                         }} sx={{ mr: 1 }}>
                             Cancel

@@ -49,6 +49,32 @@ export const createRestaurant = async (req: Request,
         });
 
     } catch (error) {
+        console.log(error);
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_SERVER_ERROR });
+    }
+}
+
+export const listRestaurants = async (req: Request,
+    res: Response,
+    next: NextFunction) => {
+    try {
+        const restaurantList = await Restaurant.findAll({
+            attributes: [
+                ['id', 'restaurantId'],
+                'name',
+                'address',
+                'contact'
+            ],
+            order: [
+                ['name', 'ASC']  
+            ]
+        });
+        res.status(StatusCodes.OK).json({
+            restaurants: restaurantList
+        });
+
+    } catch (error) {
         console.log(error)
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_SERVER_ERROR })
     }
 }
