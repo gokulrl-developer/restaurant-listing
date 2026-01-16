@@ -18,7 +18,7 @@ import Grid from "@mui/material/Grid"
 import { useEffect, useState } from "react";
 import type { Restaurant, RestaurantInput, RestaurantValidationError } from "../types/restaurant.types";
 import { useApiErrorHandler } from "../hooks/useApiErrorHandler";
-import { createRestaurantAPI, listRestaurantsAPI } from "../services/restaurantService";
+import { createRestaurantAPI, listRestaurantsAPI, updateRestaurantAPI } from "../services/restaurantService";
 import { toast } from "sonner";
 import { RegexValues } from "../constants/regex-values";
 import { Messages } from "../constants/messages";
@@ -37,8 +37,9 @@ const style = {
 
 export default function RestaurantList() {
     const [showCreateModal, setShowCreateModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
     const [openDelete, setOpenDelete] = useState(false);
-    const [restaurants,setRestaurants]=useState<Restaurant[]>([]);
+    const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
     const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
     const [restaurantInput, setRestaurantInput] = useState<RestaurantInput>({
         name: "",
@@ -53,16 +54,16 @@ export default function RestaurantList() {
         }
     )
     const { handleApiError } = useApiErrorHandler();
-    useEffect(()=>{
+    useEffect(() => {
         listRestaurants();
-    },[])
-    const listRestaurants=async()=>{
-        try{
-            const restaurantsObject=await listRestaurantsAPI();
+    }, [])
+    const listRestaurants = async () => {
+        try {
+            const restaurantsObject = await listRestaurantsAPI();
             setRestaurants(restaurantsObject.restaurants)
 
-        }catch(error){
-            console.log("error on fetching restaurants",error);
+        } catch (error) {
+            console.log("error on fetching restaurants", error);
             handleApiError(error)
         }
     }
@@ -118,6 +119,51 @@ export default function RestaurantList() {
             handleApiError(error)
         }
     }
+    const editRestaurant = async () => {
+        if(!selectedRestaurant){
+            toast.error("some error occured.Please try again later.");
+            return;
+        }
+        const validationErrors: RestaurantValidationError = validateRestaurant();
+        if (Object.values(validationErrors).every((error: string[]) => error.length === 0) === false) {
+            console.log(validationErrors)
+            setErrors(validationErrors)
+            return;
+        }
+         const updatePayload: Partial<RestaurantInput> = {};
+
+    if (restaurantInput.name !== selectedRestaurant.name) {
+        updatePayload.name = restaurantInput.name;
+    }
+
+    if (restaurantInput.address !== selectedRestaurant.address) {
+        updatePayload.address = restaurantInput.address;
+    }
+
+    if (restaurantInput.contact !== selectedRestaurant.contact) {
+        updatePayload.contact = restaurantInput.contact;
+    }
+
+    if (Object.keys(updatePayload).length === 0) {
+        toast.info(Messages.NO_CHANGES_DETECTED);
+        return;
+    }
+        try {
+            const restaurantWithMessage = await updateRestaurantAPI({
+                ...updatePayload,
+              restaurantId:selectedRestaurant.restaurantId.toString(),
+            });
+            toast.success(restaurantWithMessage.message);
+            listRestaurants();
+            setShowEditModal(false);
+            setSelectedRestaurant(null);
+            clearRestaurantInput();
+            clearErrors()
+        } catch (error) {
+            console.log(error);
+            handleApiError(error)
+        }
+    }
 
     const clearErrors = () => {
         setErrors({
@@ -127,11 +173,11 @@ export default function RestaurantList() {
         })
     }
 
-    const clearRestaurantInput=()=>{
+    const clearRestaurantInput = () => {
         setRestaurantInput({
-            name:"",
-            address:"",
-            contact:""
+            name: "",
+            address: "",
+            contact: ""
         })
     }
     // const handleEdit = (restaurant: Restaurant) => {
@@ -172,7 +218,15 @@ export default function RestaurantList() {
                                     <Typography color="text.secondary">{restaurant.address}</Typography>
                                     <Typography variant="body2" color="text.secondary">{restaurant.contact}</Typography>
                                     <Box sx={{ display: "flex" }}>
-                                        <Button onClick={() => setShowCreateModal(true)}>
+                                        <Button onClick={() => {
+                                            setSelectedRestaurant(restaurant);
+                                            setRestaurantInput({
+                                                name: restaurant.name,
+                                                address: restaurant.address,
+                                                contact: restaurant.contact
+                                            })
+                                            setShowEditModal(true);
+                                        }}>
                                             Edit
                                         </Button>
                                         <Button onClick={() => handleDelete(restaurant)}>
@@ -190,7 +244,7 @@ export default function RestaurantList() {
                 setShowCreateModal(false);
                 clearRestaurantInput();
                 clearErrors();
-                }}>
+            }}>
                 <Box sx={style}>
                     <Typography variant="h6" mb={2}>
                         Add Restaurant
@@ -244,6 +298,72 @@ export default function RestaurantList() {
                             Cancel
                         </Button>
                         <Button variant="contained" onClick={() => createRestaurant()}>
+                            Save
+                        </Button>
+                    </Grid>
+                </Box>
+            </Modal>
+            {/* Edit */}
+            <Modal open={showEditModal} onClose={() => {
+                setShowEditModal(false);
+                clearRestaurantInput();
+                setSelectedRestaurant(null);
+                clearErrors();
+            }}>
+                <Box sx={style}>
+                    <Typography variant="h6" mb={2}>
+                        Edit Restaurant
+                    </Typography>
+
+                    <TextField
+                        fullWidth
+                        label="Restaurant Name"
+                        margin="normal"
+                        value={restaurantInput?.name || ""}
+                        onChange={(e) =>
+                            setRestaurantInput({ ...restaurantInput, name: e.target.value })
+                        }
+                    />
+                    <Typography variant="caption" color="error">
+                        {errors.nameError && errors.nameError.length > 0 &&
+                            errors.nameError.join(",")}
+                    </Typography>
+                    <TextField
+                        fullWidth
+                        label="Address"
+                        margin="normal"
+                        value={restaurantInput?.address || ""}
+                        onChange={(e) =>
+                            setRestaurantInput({ ...restaurantInput, address: e.target.value })
+                        }
+                    />
+                    <Typography variant="caption" color="error">
+                        {errors.addressError && errors.addressError.length > 0 &&
+                            errors.addressError.join(",")}
+                    </Typography>
+                    <TextField
+                        fullWidth
+                        label="Contact"
+                        margin="normal"
+                        value={restaurantInput?.contact || ""}
+                        onChange={(e) =>
+                            setRestaurantInput({ ...restaurantInput, contact: e.target.value })
+                        }
+                    />
+                    <Typography variant="caption" color="error">
+                        {errors.contactError && errors.contactError.length > 0 &&
+                            errors.contactError.join(",")}
+                    </Typography>
+                    <Grid container justifyContent="flex-end" mt={2}>
+                        <Button onClick={() => {
+                            setShowCreateModal(false);
+                            setSelectedRestaurant(null);
+                            clearRestaurantInput()
+                            clearErrors();
+                        }} sx={{ mr: 1 }}>
+                            Cancel
+                        </Button>
+                        <Button variant="contained" onClick={() => editRestaurant()}>
                             Save
                         </Button>
                     </Grid>

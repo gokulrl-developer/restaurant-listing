@@ -8,4 +8,9 @@ export const Messages={
   RESTAURANT_EXISTS:"The restaurant already exists in the list",
   RESTAURANT_CREATED:"The restaurant saved successfully",
   INTERNAL_SERVER_ERROR:"Internal server error",
+  INVALID_REQUEST:"Invalid request",
+  INVALID_NAME:"Inavalid name",
+  INVALID_ADDRESS:"Invalid address",
+  RESTAURANT_UPDATED:"Restaurant updated successfully",
+  RESTAURANT_NOT_FOUND:"Restaurant not found"
 }as const;

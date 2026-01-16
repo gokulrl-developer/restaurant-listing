@@ -6,4 +6,8 @@ export const Messages={
   ADDRESS_INVALID_LENGTH:"Address must be of 5 - 255 characters length",
   CONTACTS_INVALID: "Phone must be a 10 digit number",
   RESTAURANT_CREATED:"The restaurant saved successfully",
+  INVALID_NAME:"Inavalid name",
+  INVALID_ADDRESS:"Invalid address",
+  RESTAURANT_UPDATED:"Restaurant updated successfully",
+  NO_CHANGES_DETECTED:"No changes detected",
 }as const;

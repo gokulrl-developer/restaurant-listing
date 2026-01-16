@@ -25,3 +25,15 @@ export interface RestaurantInput{
 export interface ListRestaurantsResponse{
     restaurants:Restaurant[]
 }
+
+export interface RestaurantUpdateInput{
+    restaurantId:string,
+    name?:string,
+    address?:string,
+    contact?:string
+}
+
+export interface UpdateRestaurantResponse{
+    message:string,
+    restaurant:Restaurant
+}

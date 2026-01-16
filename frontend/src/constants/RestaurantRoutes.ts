@@ -1,4 +1,5 @@
-export const RestaurantRoutes={
-  CREATE_RESTAURANT:"/restaurants",
-  LIST_RESTAURANTS:"/restaurants",
-}as const;
+export const RestaurantRoutes = {
+    CREATE_RESTAURANT: "/restaurants",
+    LIST_RESTAURANTS: "/restaurants",
+    UPDATE_RESTAURANT: (restaurantId:string)=>`/restaurants/${restaurantId}`
+} as const;
