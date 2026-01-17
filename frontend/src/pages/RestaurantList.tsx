@@ -10,7 +10,9 @@ import {
     Dialog,
     DialogTitle,
     DialogContent,
-    DialogActions
+    DialogActions,
+    AppBar,
+    Toolbar
 } from "@mui/material";
 import Grid from "@mui/material/Grid"
 import { useEffect, useState } from "react";
@@ -20,7 +22,11 @@ import { createRestaurantAPI, listRestaurantsAPI, removeRestaurantAPI, updateRes
 import { toast } from "sonner";
 import { RegexValues } from "../constants/regex-values";
 import { Messages } from "../constants/messages";
-
+import { orange, red,blueGrey } from "@mui/material/colors";
+import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
+import EditIcon from '@mui/icons-material/Edit';
+import PhoneIcon from '@mui/icons-material/Phone';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
 const style = {
     position: "absolute",
     top: "50%",
@@ -184,48 +190,57 @@ export default function RestaurantList() {
         setShowDeleteModal(true);
     };
 
-    const deleteRestaurant=async ()=>{
-        try{
-            if(selectedRestaurant===null){
+    const deleteRestaurant = async () => {
+        try {
+            if (selectedRestaurant === null) {
                 toast.error("Some error occured.Please try again later.")
             }
-           const deletionResponse=await removeRestaurantAPI(selectedRestaurant!.restaurantId.toString());
-           toast.success(deletionResponse.message|| Messages.RESTAURANT_REMOVED);
-           listRestaurants();
-           setSelectedRestaurant(null);
-           setShowDeleteModal(false);
-        }catch(error){
-            console.log("error deleting restaurant",error);
+            const deletionResponse = await removeRestaurantAPI(selectedRestaurant!.restaurantId.toString());
+            toast.success(deletionResponse.message || Messages.RESTAURANT_REMOVED);
+            listRestaurants();
+            setSelectedRestaurant(null);
+            setShowDeleteModal(false);
+        } catch (error) {
+            console.log("error deleting restaurant", error);
             handleApiError(error)
         }
     }
     return (
-        <Container sx={{ mt: 4, minHeight: "100vh", width: "100vw" }}>
+        <Container sx={{minHeight: "100vh", background:blueGrey[200]}}>
             {/* Header */}
-            <Grid container mb={3}>
-                <Box sx={{ display: "flex", flexDirection: "column", width: "100vw" }}>
-                    <Typography variant="h4" align="center">Restaurant Listing</Typography>
-                    <Button variant="contained" sx={{ mr: 0, width: "fit-content" }} onClick={() => setShowCreateModal(true)}>
+            <Box sx={{ display: "flex",flexDirection: "column" }}>
+                <Box sx={{mt:2}}>
+                    <AppBar position="static" sx={{background:"black"}}>
+                        <Toolbar variant="dense">
+                            <Typography variant="h6" sx={{mx:"auto"}} color="inherit" component="div">
+                                RESTAURANT LISTING
+                            </Typography>
+                        </Toolbar>
+                    </AppBar>
+                </Box>
+                <Box sx={{mt:5}}>
+                    <Button
+                        variant="contained"
+                        onClick={() => setShowCreateModal(true)}
+                        sx={{background:"black"}}
+                    >
                         Add Restaurant
                     </Button>
                 </Box>
-
                 {/* Restaurant Cards */}
-                <Grid container spacing={3} sx={{ mt: 3 }}>
+                <Grid container spacing={3} sx={{ mt: 4 }}>
                     {restaurants && restaurants.length > 0 && restaurants.map((restaurant) => (
                         <Grid
                             component={"div" as React.ElementType}
                             item
-                            xs={12}     // 1 per row on mobile
-                            sm={6}      // 2 per row on small screens
-                            md={4}      // 3 per row on medium screens
+                            size={{ xs: 12, sm: 6, md: 4 }}
                             key={restaurant.restaurantId} // always include key
                         >
                             <Card>
-                                <CardContent>
-                                    <Typography variant="h6">{restaurant.name}</Typography>
-                                    <Typography color="text.secondary">{restaurant.address}</Typography>
-                                    <Typography variant="body2" color="text.secondary">{restaurant.contact}</Typography>
+                                <CardContent sx={{ background: "white" }}>
+                                    <Typography variant="h6" sx={{ textAlign: "center" }}>{restaurant.name}</Typography>
+                                    <Typography color="text.secondary" sx={{ overflowWrap: "break-word" }}><LocationOnIcon sx={{ fontSize: "large", color: red[500] }} /> {restaurant.address}</Typography>
+                                    <Typography variant="body2" color="text.secondary"><PhoneIcon sx={{ fontSize: "large", color: "green" }} />{restaurant.contact}</Typography>
                                     <Box sx={{ display: "flex" }}>
                                         <Button onClick={() => {
                                             setSelectedRestaurant(restaurant);
@@ -235,11 +250,13 @@ export default function RestaurantList() {
                                                 contact: restaurant.contact
                                             })
                                             setShowEditModal(true);
-                                        }}>
-                                            Edit
+                                        }}
+                                            size="small"
+                                        >
+                                            <EditIcon sx={{ color: "black" }} />
                                         </Button>
                                         <Button onClick={() => openDeleteModal(restaurant)}>
-                                            Delete
+                                            <DeleteOutlineOutlinedIcon sx={{ color: "red" }} />
                                         </Button>
                                     </Box>
                                 </CardContent>
@@ -247,7 +264,7 @@ export default function RestaurantList() {
                         </Grid>
                     ))}
                 </Grid>
-            </Grid>
+            </Box>
             {/* Add */}
             <Modal open={showCreateModal} onClose={() => {
                 setShowCreateModal(false);
@@ -365,7 +382,7 @@ export default function RestaurantList() {
                     </Typography>
                     <Grid container justifyContent="flex-end" mt={2}>
                         <Button onClick={() => {
-                            setShowCreateModal(false);
+                            setShowEditModal(false);
                             setSelectedRestaurant(null);
                             clearRestaurantInput()
                             clearErrors();
@@ -395,7 +412,7 @@ export default function RestaurantList() {
                     }}>
                         Cancel
                     </Button>
-                    <Button color="error" variant="contained" onClick={()=>deleteRestaurant()}>
+                    <Button color="error" variant="contained" onClick={() => deleteRestaurant()}>
                         Delete
                     </Button>
                 </DialogActions>
