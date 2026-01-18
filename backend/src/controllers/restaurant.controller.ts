@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
-import { RegexValues } from "../constants/regex-values";
-import { Restaurant } from "../models/restaurant.model";
-import { Messages } from "../constants/messages";
-import { StatusCodes } from "../constants/status-codes";
+import { RegexValues } from "../constants/regex-values.js";
+import db  from "../models/index.js";
+import { Messages } from "../constants/messages.js";
+import { StatusCodes } from "../constants/status-codes.js";
 
 export const createRestaurant = async (req: Request,
     res: Response,
@@ -30,7 +30,7 @@ export const createRestaurant = async (req: Request,
             return res.status(StatusCodes.BAD_REQUEST).json({ message: Messages.CONTACTS_INVALID })
         }
 
-        const existing = await Restaurant.findOne({
+        const existing = await db.Restaurant.findOne({
             where: { name, address }
         });
 
@@ -38,7 +38,7 @@ export const createRestaurant = async (req: Request,
             return res.status(StatusCodes.CONFLICT).json({ message: Messages.RESTAURANT_EXISTS })
         }
 
-        const newRestaurant = await Restaurant.create({ name, address, contact, createdAt: new Date(), updatedAt: new Date() });
+        const newRestaurant = await db.Restaurant.create({ name, address, contact, createdAt: new Date(), updatedAt: new Date() });
         res.status(StatusCodes.CREATED).json({
             restaurant: {
                 restaurantId: newRestaurant.id,
@@ -58,7 +58,8 @@ export const listRestaurants = async (req: Request,
     res: Response,
     next: NextFunction) => {
     try {
-        const restaurantList = await Restaurant.findAll({
+        console.log(db.Restaurant)
+        const restaurantList = await db.Restaurant.findAll({
             attributes: [
                 ['id', 'restaurantId'],
                 'name',
@@ -117,7 +118,7 @@ export const updateRestaurant = async (req: Request,
                 return res.status(StatusCodes.BAD_REQUEST).json({ message: Messages.CONTACTS_INVALID })
             }
         }
-        const existing = await Restaurant.findOne({
+        const existing = await db.Restaurant.findOne({
             where: { id: restaurantId }
         });
 
@@ -129,11 +130,11 @@ export const updateRestaurant = async (req: Request,
         if (req.body.address) updates.address = req.body.address;
         if (req.body.contact) updates.contact = req.body.contact;
 
-        await Restaurant.update(updates, {
+        await db.Restaurant.update(updates, {
             where: { id: restaurantId },
         });
 
-        const updatedRestaurant = await Restaurant.findOne({
+        const updatedRestaurant = await db.Restaurant.findOne({
             where: { id: restaurantId },
             attributes: ["id", "name", "address", "contact"],
         });
@@ -156,7 +157,7 @@ export const removeRestaurant = async (req: Request,
         if (!restaurantId) {
             res.status(StatusCodes.BAD_REQUEST).json({ message:Messages.INVALID_REQUEST})
         }
-       const deletedCount = await Restaurant.destroy({
+       const deletedCount = await db.Restaurant.destroy({
             where: { id: restaurantId },
         });
 

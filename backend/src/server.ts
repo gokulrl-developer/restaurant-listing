@@ -1,6 +1,6 @@
 import { config } from "dotenv"
 config()
-import app from "./app";
+import app from "./app.js";
 
 
 const startServer = async () => {
