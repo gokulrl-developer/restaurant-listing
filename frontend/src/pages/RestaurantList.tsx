@@ -22,7 +22,7 @@ import { createRestaurantAPI, listRestaurantsAPI, removeRestaurantAPI, updateRes
 import { toast } from "sonner";
 import { RegexValues } from "../constants/regex-values";
 import { Messages } from "../constants/messages";
-import { orange, red,blueGrey } from "@mui/material/colors";
+import { red,blueGrey } from "@mui/material/colors";
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 import EditIcon from '@mui/icons-material/Edit';
 import PhoneIcon from '@mui/icons-material/Phone';
