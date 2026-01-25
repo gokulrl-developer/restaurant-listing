@@ -64,6 +64,7 @@ export default function RestaurantList() {
     const listRestaurants = async () => {
         try {
             const restaurantsObject = await listRestaurantsAPI();
+            console.log(restaurantsObject)
             setRestaurants(restaurantsObject.restaurants)
 
         } catch (error) {
@@ -234,7 +235,7 @@ export default function RestaurantList() {
                             component={"div" as React.ElementType}
                             item
                             size={{ xs: 12, sm: 6, md: 4 }}
-                            key={restaurant.restaurantId} // always include key
+                            key={restaurant.restaurantId} 
                         >
                             <Card>
                                 <CardContent sx={{ background: "white" }}>

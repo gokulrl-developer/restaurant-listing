@@ -19,3 +19,4 @@ export const updateRestaurantAPI=(payload:RestaurantUpdateInput)=>{
 export const removeRestaurantAPI=(restaurantId:string)=>{
     return axiosInstance.delete<RemoveRestaurantResponse>(RestaurantRoutes.REMOVE_RESTAURANT(restaurantId)).then(res=>res.data)
 }
+
