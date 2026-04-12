@@ -68,6 +68,7 @@ export default class RestaurantController {
                 });
 
         } catch (error) {
+            console.log(error)
             return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_SERVER_ERROR })
         }
     }
