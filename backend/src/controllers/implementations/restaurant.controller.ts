@@ -20,7 +20,17 @@ export default class RestaurantController {
             if (!name || typeof name !== "string") {
                 return res.status(StatusCodes.BAD_REQUEST).json({ message: Messages.NAME_REQUIRED })
             }
-            if (!address || typeof address !== "string") {
+            if (!address || typeof address !== "object") {
+                return res.status(StatusCodes.BAD_REQUEST).json({ message: Messages.ADDRESS_REQUIRED })
+            }
+
+            if (address && typeof address === "object" && (
+                (!address.street || typeof address.street !== "string") ||
+                (!address.city || typeof address.city !== "string") ||
+                (!address.state || typeof address.state !== "string") ||
+                (!address.country || typeof address.country !== "string") ||
+                (!address.postalCode || typeof address.postalCode !== "string")
+            )) {
                 return res.status(StatusCodes.BAD_REQUEST).json({ message: Messages.ADDRESS_REQUIRED })
             }
 
@@ -63,9 +73,9 @@ export default class RestaurantController {
         next: NextFunction) => {
         try {
             const restaurantList = await this._restaurantService.list();
-                res.status(StatusCodes.OK).json({
-                    restaurants: restaurantList
-                });
+            res.status(StatusCodes.OK).json({
+                restaurants: restaurantList
+            });
 
         } catch (error) {
             console.log(error)
@@ -81,7 +91,7 @@ export default class RestaurantController {
             if (!restaurantId) {
                 res.status(StatusCodes.BAD_REQUEST).json({ message: Messages.INVALID_REQUEST })
             }
-            req.body.restaurantId=Number(restaurantId);
+            req.body.restaurantId = Number(restaurantId);
             if (req.body.name) {
                 const name = req.body.name;
                 if (typeof name !== "string") {
@@ -91,8 +101,17 @@ export default class RestaurantController {
 
             if (req.body.address) {
                 const address = req.body.address;
-                if (typeof address !== "string") {
+                if (typeof address !== "object") {
                     return res.status(StatusCodes.BAD_REQUEST).json({ message: Messages.INVALID_ADDRESS })
+                }
+                if (address && typeof address === "object" && (
+                    (address.street && typeof address.street !== "string") ||
+                    (address.city && typeof address.city !== "string") ||
+                    (address.state && typeof address.state !== "string") ||
+                    (address.country && typeof address.country !== "string") ||
+                    (address.postalCode && typeof address.postalCode !== "string")
+                )) {
+                    return res.status(StatusCodes.BAD_REQUEST).json({ message: Messages.ADDRESS_REQUIRED })
                 }
             }
 
@@ -105,7 +124,7 @@ export default class RestaurantController {
                     return res.status(StatusCodes.BAD_REQUEST).json({ message: Messages.CONTACTS_INVALID })
                 }
             }
-            
+
             const updatedRestaurant = await this._restaurantService.update(req.body)
 
             return res.status(StatusCodes.OK).json({
@@ -114,13 +133,13 @@ export default class RestaurantController {
             });
 
         } catch (error) {
-            if(error instanceof AppError){
-                if(error.code==="VALIDATION_ERROR"){
-                    return res.status(StatusCodes.BAD_REQUEST).json({message:error.message});
-                }else if(error.code==="RESTAURANT_NOT_FOUND"){
-                    return res.status(StatusCodes.NOT_FOUND).json({message:error.message})
+            if (error instanceof AppError) {
+                if (error.code === "VALIDATION_ERROR") {
+                    return res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
+                } else if (error.code === "RESTAURANT_NOT_FOUND") {
+                    return res.status(StatusCodes.NOT_FOUND).json({ message: error.message })
                 }
-            }else{
+            } else {
                 res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_SERVER_ERROR })
             }
         }
@@ -134,15 +153,15 @@ export default class RestaurantController {
             if (!restaurantId) {
                 res.status(StatusCodes.BAD_REQUEST).json({ message: Messages.INVALID_REQUEST })
             }
-             await this._restaurantService.removeById(Number(restaurantId));
+            await this._restaurantService.removeById(Number(restaurantId));
             return res.status(StatusCodes.OK).json({
                 message: Messages.RESTAURANT_REMOVED,
             });
 
         } catch (error) {
-            if(error instanceof AppError){
-                if(error.code ==="RESTAURANT_NOT_FOUND"){
-                    return res.status(StatusCodes.NOT_FOUND).json({message:error.message})
+            if (error instanceof AppError) {
+                if (error.code === "RESTAURANT_NOT_FOUND") {
+                    return res.status(StatusCodes.NOT_FOUND).json({ message: error.message })
                 }
             }
             res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: Messages.INTERNAL_SERVER_ERROR })

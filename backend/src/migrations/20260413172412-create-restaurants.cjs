@@ -14,9 +14,15 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false
       },
-      address: {
-        type: Sequelize.STRING,
-        allowNull: false
+       addressId: { 
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'Addresses', 
+          key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'RESTRICT'
       },
       contact: {
         type: Sequelize.STRING,

@@ -4,69 +4,72 @@ import {
     InferAttributes,
     InferCreationAttributes,
     CreationOptional,
-    Sequelize,
-    ForeignKey
+    Sequelize
 } from "sequelize";
-import Address from "./address.model.js";
-export default class Restaurant extends Model<
-    InferAttributes<Restaurant>,
-    InferCreationAttributes<Restaurant>
+
+export default class Address extends Model<
+    InferAttributes<Address>,
+    InferCreationAttributes<Address>
 > {
     declare id: CreationOptional<number>;
-    declare name: string;
-    declare addressId: ForeignKey<Address["id"]>;
-    declare contact: string;
+    declare street: string;
+    declare city: string;
+    declare state: string;
+    declare country: string;
+    declare postalCode: string;
+
 
     declare readonly createdAt: Date;
     declare readonly updatedAt: Date;
 
     static initModel(sequelize: Sequelize) {
-        Restaurant.init(
+        Address.init(
             {
                 id: {
                     type: DataTypes.INTEGER,
                     autoIncrement: true,
                     primaryKey: true
                 },
-                name: {
+                street: {
                     type: DataTypes.STRING,
                     allowNull: false
                 },
-                addressId: {
-                    type: DataTypes.INTEGER,
-                    allowNull: false,
-                    references: {
-                        model: "Addresses",
-                        key: "id"
-                    },
-                    onUpdate: "CASCADE",
-                    onDelete: "RESTRICT"
+                city: {
+                    type: DataTypes.STRING,
+                    allowNull: false
                 },
-                contact: {
+                state: {
+                    type: DataTypes.STRING,
+                    allowNull: false
+                },
+                country: {
+                    type: DataTypes.STRING,
+                    allowNull: false
+                },
+                postalCode: {
                     type: DataTypes.STRING,
                     allowNull: false
                 },
                 createdAt: {
                     type: DataTypes.DATE,
-                    allowNull: false,
+                    allowNull: false
                 },
                 updatedAt: {
                     type: DataTypes.DATE,
-                    allowNull: false,
+                    allowNull: false
                 }
             },
             {
                 sequelize,
-                tableName: "Restaurants",
-                modelName: "Restaurant"
+                tableName: "Addresses",
+                modelName: "Address"
             }
         );
     }
-    static associate(models: any) {
-        Restaurant.belongsTo(models.Address, {
+     static associate(models: any) {
+        Address.hasMany(models.Restaurant, {
             foreignKey: "addressId",
-            as: "address"
+            as: "restaurants"
         });
     }
 }
-

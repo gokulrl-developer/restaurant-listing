@@ -1,25 +1,35 @@
-import { IRestaurant, RestaurantUpdates } from "../../repository/interfaces/restaurant.respository.js";
+import { IAddress } from "../../repository/interfaces/address.repository.js";
+import { IRestaurant, RestaurantUpdates, RestaurantWithAddress } from "../../repository/interfaces/restaurant.respository.js";
 import { CreateRestaurantDTO, UpdateRestaurantDTO } from "../dtos/restaurant.dto.js";
 import { CreateResponse, ListResponseItem, UpdateResponse } from "../interfaces/restaurant.service.interface.js";
 
-export const createDTOToRecord=(createDTO:CreateRestaurantDTO):IRestaurant=>{
+export const createDTOToRecord=(createDTO:CreateRestaurantDTO,addressId:number):IRestaurant=>{
     return {
-        ...createDTO,
+        name:createDTO.name,
+        contact:createDTO.contact,
+        addressId:addressId,
         createdAt:new Date(),
         updatedAt:new Date()
     }
 }
 
-export const recordToCreateResponse=(restaurant:IRestaurant):CreateResponse=>{
+export const recordToCreateResponse=(restaurant:IRestaurant,address:IAddress):CreateResponse=>{
     return {
         restaurantId:restaurant.id!,
         name:restaurant.name,
-        address:restaurant.address,
+        address:{
+            addressId:address.id!,
+            street:address.street,
+            city:address.city,
+            state:address.state,
+            country:address.country,
+            postalCode:address.postalCode
+        },
         contact:restaurant.contact
     }
 }
 
-export const recordToListResponseItem=(restaurant:IRestaurant):ListResponseItem=>{
+export const recordToListResponseItem=(restaurant:RestaurantWithAddress):ListResponseItem=>{
     return {
         restaurantId:restaurant.id!,
         name:restaurant.name,
@@ -31,16 +41,23 @@ export const recordToListResponseItem=(restaurant:IRestaurant):ListResponseItem=
 export const updateDTOToRecord=(updateDTO:UpdateRestaurantDTO):RestaurantUpdates=>{
     return {
         ...(updateDTO.name && {name:updateDTO.name}),
-        ...(updateDTO.address && {name:updateDTO.address}),
-        ...(updateDTO.contact && {name:updateDTO.contact}),
+        ...(updateDTO.address && {address:updateDTO.address}),
+        ...(updateDTO.contact && {contact:updateDTO.contact}),
     }
 }
 
-export const recordToUpdateResponse=(restaurant:IRestaurant):UpdateResponse=>{
+export const recordToUpdateResponse=(restaurant:IRestaurant,address:IAddress):UpdateResponse=>{
      return {
         restaurantId:restaurant.id!,
         name:restaurant.name,
-        address:restaurant.address,
+        address:{
+            addressId:address.id!,
+            street:address.street,
+            city:address.city,
+            state:address.state,
+            country:address.country,
+            postalCode:address.postalCode
+        },
         contact:restaurant.contact
     }
 }

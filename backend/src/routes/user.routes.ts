@@ -3,9 +3,12 @@ import RestaurantController from "../controllers/implementations/restaurant.cont
 import { Routes } from "../constants/routes.js";
 import RestaurantRepository from "../repository/implementations/restaurant.repository.js";
 import RestaurantService from "../services/implementations/restaurant.service.js";
+import AddressRepository from "../repository/implementations/address.respository.js";
+import Address from "../models/address.model.js";
 
 const restaurantRepository=new RestaurantRepository();
-const restaurantService=new RestaurantService(restaurantRepository);
+const addressRepository=new AddressRepository();
+const restaurantService=new RestaurantService(restaurantRepository,addressRepository);
 const restaurantController=new RestaurantController(restaurantService);
 
 const router=Router();
