@@ -22,7 +22,7 @@ import { createRestaurantAPI, listRestaurantsAPI, removeRestaurantAPI, updateRes
 import { toast } from "sonner";
 import { RegexValues } from "../constants/regex-values";
 import { Messages } from "../constants/messages";
-import { red,blueGrey } from "@mui/material/colors";
+import { red, blueGrey } from "@mui/material/colors";
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 import EditIcon from '@mui/icons-material/Edit';
 import PhoneIcon from '@mui/icons-material/Phone';
@@ -47,13 +47,23 @@ export default function RestaurantList() {
     const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
     const [restaurantInput, setRestaurantInput] = useState<RestaurantInput>({
         name: "",
-        address: "",
+        address: {
+            street: "",
+            city: "",
+            state: "",
+            country: "",
+            postalCode: ""
+        },
         contact: ""
     })
     const [errors, setErrors] = useState<RestaurantValidationError>(
         {
             nameError: [],
-            addressError: [],
+            streetError: [],
+            cityError: [],
+            stateError: [],
+            countryError: [],
+            postalCodeError: [],
             contactError: []
         }
     )
@@ -74,10 +84,15 @@ export default function RestaurantList() {
     }
     const validateRestaurant = () => {
         const { name, address, contact } = restaurantInput;
+        const { street, city, state, country, postalCode } = address;
         const phoneRegex = RegexValues.PHONE_REGEX;
         let errors: RestaurantValidationError = {
             nameError: [],
-            addressError: [],
+            streetError: [],
+            cityError: [],
+            stateError: [],
+            countryError: [],
+            postalCodeError: [],
             contactError: []
         }
         if (!name || typeof name !== "string") {
@@ -86,12 +101,41 @@ export default function RestaurantList() {
         if ((name && typeof name === "string") && (name.length < 2 || name.length > 100)) {
             errors = { ...errors, nameError: [...errors.nameError, Messages.NAME_INVALID_LENGTH] }
         }
-        if (!address || typeof address !== "string") {
-            errors = { ...errors, addressError: [...errors.addressError, Messages.ADDRESS_REQUIRED] }
+        if (!street || typeof street !== "string") {
+            errors = { ...errors, streetError: [...errors.streetError, Messages.STREET_REQUIRED] }
         }
-        if ((address && typeof address === "string") && (address.length < 5 || address.length > 255)) {
-            errors = { ...errors, addressError: [...errors.addressError, Messages.ADDRESS_INVALID_LENGTH] }
+        if ((street && typeof street === "string") && (street.length < 2 || street.length > 100)) {
+            errors = { ...errors, streetError: [...errors.streetError, Messages.STREET_REQUIRED] }
         }
+        if (!city || typeof city !== "string") {
+            errors = { ...errors, cityError: [...errors.cityError, Messages.CITY_REQUIRED] }
+        }
+        if ((city && typeof city === "string") && (city.length < 2 || city.length > 100)) {
+            errors = { ...errors, cityError: [...errors.cityError, Messages.CITY_REQUIRED] }
+        }
+        if (!state || typeof state !== "string") {
+            errors = { ...errors, stateError: [...errors.stateError, Messages.STATE_REQUIRED] }
+        }
+        if ((state && typeof state === "string") && (state.length < 2 || state.length > 100)) {
+            errors = { ...errors, stateError: [...errors.stateError, Messages.STATE_REQUIRED] }
+        }
+        if (!country || typeof country !== "string") {
+            errors = { ...errors, countryError: [...errors.countryError, Messages.COUNTRY_REQUIRED] }
+        }
+        if ((country && typeof country === "string") && (country.length < 2 || country.length > 100)) {
+            errors = { ...errors, countryError: [...errors.countryError, Messages.COUNTRY_REQUIRED] }
+        }
+        if (!postalCode || typeof postalCode !== "string") {
+            errors = { ...errors, postalCodeError: [...errors.postalCodeError, Messages.POSTAL_CODE_REQUIRED] }
+        }
+        if ((postalCode && typeof postalCode === "string") && (
+            !postalCode ||
+            postalCode.length < 2 ||
+            postalCode.length > 10 ||
+            !/^\d+$/.test(postalCode))) {
+            errors = { ...errors, postalCodeError: [...errors.postalCodeError, Messages.POSTAL_CODE_REQUIRED] }
+        }
+
         if (!contact) {
             errors = { ...errors, contactError: [...errors.contactError, Messages.CONTACTS_REQUIRED] }
         }
@@ -141,7 +185,18 @@ export default function RestaurantList() {
             updatePayload.name = restaurantInput.name;
         }
 
-        if (restaurantInput.address !== selectedRestaurant.address) {
+        if ((
+            restaurantInput.address.street
+            !== selectedRestaurant.address.street ||
+            restaurantInput.address.city
+            !== selectedRestaurant.address.city ||
+            restaurantInput.address.state
+            !== selectedRestaurant.address.state ||
+            restaurantInput.address.country
+            !== selectedRestaurant.address.country ||
+            restaurantInput.address.postalCode
+            !== selectedRestaurant.address.postalCode
+        )) {
             updatePayload.address = restaurantInput.address;
         }
 
@@ -173,7 +228,11 @@ export default function RestaurantList() {
     const clearErrors = () => {
         setErrors({
             nameError: [],
-            addressError: [],
+            streetError: [],
+            cityError: [],
+            stateError: [],
+            countryError: [],
+            postalCodeError: [],
             contactError: []
         })
     }
@@ -181,7 +240,13 @@ export default function RestaurantList() {
     const clearRestaurantInput = () => {
         setRestaurantInput({
             name: "",
-            address: "",
+            address: {
+                street: "",
+                city: "",
+                state: "",
+                country: "",
+                postalCode: ""
+            },
             contact: ""
         })
     }
@@ -207,23 +272,23 @@ export default function RestaurantList() {
         }
     }
     return (
-        <Container sx={{minHeight: "100vh", background:blueGrey[200]}}>
+        <Container sx={{ minHeight: "100vh", background: blueGrey[200] }}>
             {/* Header */}
-            <Box sx={{ display: "flex",flexDirection: "column" }}>
-                <Box sx={{mt:2}}>
-                    <AppBar position="static" sx={{background:"black"}}>
+            <Box sx={{ display: "flex", flexDirection: "column" }}>
+                <Box sx={{ mt: 2 }}>
+                    <AppBar position="static" sx={{ background: "black" }}>
                         <Toolbar variant="dense">
-                            <Typography variant="h6" sx={{mx:"auto"}} color="inherit" component="div">
+                            <Typography variant="h6" sx={{ mx: "auto" }} color="inherit" component="div">
                                 RESTAURANT LISTING
                             </Typography>
                         </Toolbar>
                     </AppBar>
                 </Box>
-                <Box sx={{mt:5}}>
+                <Box sx={{ mt: 5 }}>
                     <Button
                         variant="contained"
                         onClick={() => setShowCreateModal(true)}
-                        sx={{background:"black"}}
+                        sx={{ background: "black" }}
                     >
                         Add Restaurant
                     </Button>
@@ -235,19 +300,35 @@ export default function RestaurantList() {
                             component={"div" as React.ElementType}
                             item
                             size={{ xs: 12, sm: 6, md: 4 }}
-                            key={restaurant.restaurantId} 
+                            key={restaurant.restaurantId}
                         >
                             <Card>
                                 <CardContent sx={{ background: "white" }}>
                                     <Typography variant="h6" sx={{ textAlign: "center" }}>{restaurant.name}</Typography>
-                                    <Typography color="text.secondary" sx={{ overflowWrap: "break-word" }}><LocationOnIcon sx={{ fontSize: "large", color: red[500] }} /> {restaurant.address}</Typography>
-                                    <Typography variant="body2" color="text.secondary"><PhoneIcon sx={{ fontSize: "large", color: "green" }} />{restaurant.contact}</Typography>
-                                    <Box sx={{ display: "flex" }}>
+                                    <Box sx={{ display: "flex", flexDirection: "column"}}>
+                                    <Box sx={{ display: "flex", flexDirection: "column"}}>
+                                    <Typography color="text.primary" sx={{ overflowWrap: "break-word" }}><LocationOnIcon sx={{ fontSize: "large", color: red[500] }} /> ADDRESS : </Typography>
+                                    <Box sx={{ display: "flex", flexDirection: "column",marginLeft:4,marginTop:1,marginBottom:1}}>
+                                    <Typography color="text.secondary" sx={{ overflowWrap: "break-word" }}>{restaurant.address.street+","}</Typography>
+                                    <Typography color="text.secondary" sx={{ overflowWrap: "break-word" }}>{restaurant.address.city +","}</Typography>
+                                    <Typography color="text.secondary" sx={{ overflowWrap: "break-word" }}>{restaurant.address.state +","+restaurant.address.country}</Typography>
+                                    <Typography color="text.primary" sx={{ overflowWrap: "break-word" }}>{"Zip : "+restaurant.address.postalCode}</Typography>
+                                     </Box>
+                                     </Box>
+                                    <Typography variant="body2" color="text.secondary"><PhoneIcon sx={{ fontSize: "medium", color: "green" }} />{"PHONE : "+restaurant.contact}</Typography>
+                                    <Box sx={{ display: "flex",justifyContent:"space-between" }}>
                                         <Button onClick={() => {
                                             setSelectedRestaurant(restaurant);
                                             setRestaurantInput({
                                                 name: restaurant.name,
-                                                address: restaurant.address,
+                                                address:
+                                                {
+                                                    street: restaurant.address.street,
+                                                    city: restaurant.address.city,
+                                                    state: restaurant.address.state,
+                                                    country: restaurant.address.country,
+                                                    postalCode: restaurant.address.postalCode
+                                                },
                                                 contact: restaurant.contact
                                             })
                                             setShowEditModal(true);
@@ -257,8 +338,9 @@ export default function RestaurantList() {
                                             <EditIcon sx={{ color: "black" }} />
                                         </Button>
                                         <Button onClick={() => openDeleteModal(restaurant)}>
-                                            <DeleteOutlineOutlinedIcon sx={{ color: "red" }} />
+                                            <DeleteOutlineOutlinedIcon sx={{ color: "red" }}/>
                                         </Button>
+                                    </Box>
                                     </Box>
                                 </CardContent>
                             </Card>
@@ -276,46 +358,110 @@ export default function RestaurantList() {
                     <Typography variant="h6" mb={2}>
                         Add Restaurant
                     </Typography>
-
-                    <TextField
-                        fullWidth
-                        label="Restaurant Name"
-                        margin="normal"
-                        value={restaurantInput?.name || ""}
-                        onChange={(e) =>
-                            setRestaurantInput({ ...restaurantInput, name: e.target.value })
-                        }
-                    />
-                    <Typography variant="caption" color="error">
-                        {errors.nameError && errors.nameError.length > 0 &&
-                            errors.nameError.join(",")}
-                    </Typography>
-                    <TextField
-                        fullWidth
-                        label="Address"
-                        margin="normal"
-                        value={restaurantInput?.address || ""}
-                        onChange={(e) =>
-                            setRestaurantInput({ ...restaurantInput, address: e.target.value })
-                        }
-                    />
-                    <Typography variant="caption" color="error">
-                        {errors.addressError && errors.addressError.length > 0 &&
-                            errors.addressError.join(",")}
-                    </Typography>
-                    <TextField
-                        fullWidth
-                        label="Contact"
-                        margin="normal"
-                        value={restaurantInput?.contact || ""}
-                        onChange={(e) =>
-                            setRestaurantInput({ ...restaurantInput, contact: e.target.value })
-                        }
-                    />
-                    <Typography variant="caption" color="error">
-                        {errors.contactError && errors.contactError.length > 0 &&
-                            errors.contactError.join(",")}
-                    </Typography>
+                    <Box sx={{ display: "flex", flexDirection: "row", gap: 1 }}>
+                        <TextField
+                            fullWidth
+                            label="Restaurant Name"
+                            margin="normal"
+                            value={restaurantInput?.name || ""}
+                            onChange={(e) =>
+                                setRestaurantInput({ ...restaurantInput, name: e.target.value })
+                            }
+                        />
+                        <Typography variant="caption" color="error">
+                            {errors.nameError && errors.nameError.length > 0 &&
+                                errors.nameError.join(",")}
+                        </Typography>
+                        <TextField
+                            fullWidth
+                            label="Street"
+                            margin="normal"
+                            value={restaurantInput?.address.street || ""}
+                            onChange={(e) =>
+                                setRestaurantInput({
+                                    ...restaurantInput, address: {
+                                        ...restaurantInput.address,
+                                        street: e.target.value
+                                    }
+                                })
+                            }
+                        />
+                    </Box>
+                    <Box sx={{ display: "flex", flexDirection: "row", gap: 1 }}>
+                        <TextField
+                            fullWidth
+                            label="City"
+                            margin="normal"
+                            value={restaurantInput?.address.city || ""}
+                            onChange={(e) =>
+                                setRestaurantInput({
+                                    ...restaurantInput, address: {
+                                        ...restaurantInput.address,
+                                        city: e.target.value
+                                    }
+                                })
+                            }
+                        />
+                        <TextField
+                            fullWidth
+                            label="State"
+                            margin="normal"
+                            value={restaurantInput?.address.state || ""}
+                            onChange={(e) =>
+                                setRestaurantInput({
+                                    ...restaurantInput, address: {
+                                        ...restaurantInput.address,
+                                        state: e.target.value
+                                    }
+                                })
+                            }
+                        />
+                    </Box>
+                    <Box sx={{ display: "flex", flexDirection: "row", gap: 1 }}>
+                        <TextField
+                            fullWidth
+                            label="Country"
+                            margin="normal"
+                            value={restaurantInput?.address.country || ""}
+                            onChange={(e) =>
+                                setRestaurantInput({
+                                    ...restaurantInput, address: {
+                                        ...restaurantInput.address,
+                                        country: e.target.value
+                                    }
+                                })
+                            }
+                        />
+                        <TextField
+                            fullWidth
+                            label="PostalCode"
+                            margin="normal"
+                            value={restaurantInput?.address.postalCode || ""}
+                            onChange={(e) =>
+                                setRestaurantInput({
+                                    ...restaurantInput, address: {
+                                        ...restaurantInput.address,
+                                        postalCode: e.target.value
+                                    }
+                                })
+                            }
+                        />
+                    </Box>
+                    <Box sx={{ display: "flex", flexDirection: "row", gap: 1 }}>
+                        <TextField
+                            fullWidth
+                            label="Contact"
+                            margin="normal"
+                            value={restaurantInput?.contact || ""}
+                            onChange={(e) =>
+                                setRestaurantInput({ ...restaurantInput, contact: e.target.value })
+                            }
+                        />
+                        <Typography variant="caption" color="error">
+                            {errors.contactError && errors.contactError.length > 0 &&
+                                errors.contactError.join(",")}
+                        </Typography>
+                    </Box>
                     <Grid container justifyContent="flex-end" mt={2}>
                         <Button onClick={() => {
                             setShowCreateModal(false);
@@ -341,46 +487,117 @@ export default function RestaurantList() {
                     <Typography variant="h6" mb={2}>
                         Edit Restaurant
                     </Typography>
+                    <Box sx={{ display: "flex", flexDirection: "row", gap: 1 }}>
 
-                    <TextField
-                        fullWidth
-                        label="Restaurant Name"
-                        margin="normal"
-                        value={restaurantInput?.name || ""}
-                        onChange={(e) =>
-                            setRestaurantInput({ ...restaurantInput, name: e.target.value })
-                        }
-                    />
-                    <Typography variant="caption" color="error">
-                        {errors.nameError && errors.nameError.length > 0 &&
-                            errors.nameError.join(",")}
-                    </Typography>
-                    <TextField
-                        fullWidth
-                        label="Address"
-                        margin="normal"
-                        value={restaurantInput?.address || ""}
-                        onChange={(e) =>
-                            setRestaurantInput({ ...restaurantInput, address: e.target.value })
-                        }
-                    />
-                    <Typography variant="caption" color="error">
-                        {errors.addressError && errors.addressError.length > 0 &&
-                            errors.addressError.join(",")}
-                    </Typography>
-                    <TextField
-                        fullWidth
-                        label="Contact"
-                        margin="normal"
-                        value={restaurantInput?.contact || ""}
-                        onChange={(e) =>
-                            setRestaurantInput({ ...restaurantInput, contact: e.target.value })
-                        }
-                    />
-                    <Typography variant="caption" color="error">
-                        {errors.contactError && errors.contactError.length > 0 &&
-                            errors.contactError.join(",")}
-                    </Typography>
+                        <TextField
+                            fullWidth
+                            label="Restaurant Name"
+                            margin="normal"
+                            value={restaurantInput?.name || ""}
+                            onChange={(e) =>
+                                setRestaurantInput({ ...restaurantInput, name: e.target.value })
+                            }
+                        />
+                        <Typography variant="caption" color="error">
+                            {errors.nameError && errors.nameError.length > 0 &&
+                                errors.nameError.join(",")}
+                        </Typography>
+                        <TextField
+                            fullWidth
+                            label="Street"
+                            margin="normal"
+                            value={restaurantInput?.address.street || ""}
+                            onChange={(e) =>
+                                setRestaurantInput({
+                                    ...restaurantInput, address: {
+                                        ...restaurantInput.address,
+                                        street: e.target.value
+                                    }
+                                })
+                            }
+                        />
+                    </Box>
+
+                    <Box sx={{ display: "flex", flexDirection: "row", gap: 1 }}>
+
+                        <TextField
+                            fullWidth
+                            label="City"
+                            margin="normal"
+                            value={restaurantInput?.address.city || ""}
+                            onChange={(e) =>
+                                setRestaurantInput({
+                                    ...restaurantInput, address: {
+                                        ...restaurantInput.address,
+                                        city: e.target.value
+                                    }
+                                })
+                            }
+                        />
+                        <TextField
+                            fullWidth
+                            label="State"
+                            margin="normal"
+                            value={restaurantInput?.address.state || ""}
+                            onChange={(e) =>
+                                setRestaurantInput({
+                                    ...restaurantInput, address: {
+                                        ...restaurantInput.address,
+                                        state: e.target.value
+                                    }
+                                })
+                            }
+                        />
+                    </Box>
+
+                    <Box sx={{ display: "flex", flexDirection: "row", gap: 1 }}>
+
+                        <TextField
+                            fullWidth
+                            label="Country"
+                            margin="normal"
+                            value={restaurantInput?.address.country || ""}
+                            onChange={(e) =>
+                                setRestaurantInput({
+                                    ...restaurantInput, address: {
+                                        ...restaurantInput.address,
+                                        country: e.target.value
+                                    }
+                                })
+                            }
+                        />
+                        <TextField
+                            fullWidth
+                            label="PostalCode"
+                            margin="normal"
+                            value={restaurantInput?.address.postalCode || ""}
+                            onChange={(e) =>
+                                setRestaurantInput({
+                                    ...restaurantInput, address: {
+                                        ...restaurantInput.address,
+                                        postalCode: e.target.value
+                                    }
+                                })
+                            }
+                        />
+                    </Box>
+
+                    <Box sx={{ display: "flex", flexDirection: "row", gap: 1 }}>
+
+                        <TextField
+                            fullWidth
+                            label="Contact"
+                            margin="normal"
+                            value={restaurantInput?.contact || ""}
+                            onChange={(e) =>
+                                setRestaurantInput({ ...restaurantInput, contact: e.target.value })
+                            }
+                        />
+                        <Typography variant="caption" color="error">
+                            {errors.contactError && errors.contactError.length > 0 &&
+                                errors.contactError.join(",")}
+                        </Typography>
+                    </Box>
                     <Grid container justifyContent="flex-end" mt={2}>
                         <Button onClick={() => {
                             setShowEditModal(false);
