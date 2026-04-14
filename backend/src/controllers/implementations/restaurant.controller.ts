@@ -133,6 +133,7 @@ export default class RestaurantController {
             });
 
         } catch (error) {
+            console.log(error)
             if (error instanceof AppError) {
                 if (error.code === "VALIDATION_ERROR") {
                     return res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });

@@ -142,9 +142,9 @@ export default class RestaurantService implements IRestaurantService {
             addressUpdates.postalCode=address.postalCode;
         }
         const updatedCount=await this._addressRepository.update(addressUpdates,existing.addressId);
-        const newAddress=await this._addressRepository.findById(existing.addressId);
-        updatedAddress=newAddress;
     }
+    const newAddress=await this._addressRepository.findById(existing.addressId);
+    updatedAddress=newAddress;
         return recordToUpdateResponse(updatedRestaurant!,updatedAddress!)
 
     }
